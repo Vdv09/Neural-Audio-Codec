@@ -3,23 +3,27 @@ import torch
 
 def collate_fn(dataset_items: list[dict]):
     """
-    Collate and pad fields in the dataset items.
-    Converts individual items into a batch.
+    Collate a list of dataset items into a batch.
+
+    Pads audio to the maximum length in the batch (needed for eval mode
+    where clips have different lengths). In train mode all crops are the
+    same size, so no actual padding occurs.
 
     Args:
-        dataset_items (list[dict]): list of objects from
-            dataset.__getitem__.
+        dataset_items (list[dict]): list of dicts from dataset.__getitem__.
+            Each dict must contain "audio" of shape (1, T).
     Returns:
-        result_batch (dict[Tensor]): dict, containing batch-version
-            of the tensors.
+        batch (dict): {
+            "audio":        (B, 1, T_max) float tensor,
+            "audio_length": (B,)          int tensor — original lengths.
+        }
     """
+    audios = [item["audio"] for item in dataset_items]
+    lengths = torch.tensor([a.shape[1] for a in audios])
+    max_len = lengths.max().item()
 
-    result_batch = {}
+    padded = torch.zeros(len(audios), 1, max_len)
+    for i, a in enumerate(audios):
+        padded[i, :, : a.shape[1]] = a
 
-    # example of collate_fn
-    result_batch["data_object"] = torch.vstack(
-        [elem["data_object"] for elem in dataset_items]
-    )
-    result_batch["labels"] = torch.tensor([elem["labels"] for elem in dataset_items])
-
-    return result_batch
+    return {"audio": padded, "audio_length": lengths}
