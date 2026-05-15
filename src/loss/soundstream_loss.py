@@ -18,10 +18,8 @@ class SoundStreamLoss(nn.Module):
 
         self.spectral = MultiScaleSpectralLoss(sample_rate=sample_rate)
         self.spectral_weight = spectral_weight
-
         self.adversarial_weight = adversarial_weight
         self.feature_matching_weight = feature_matching_weight
-
         self.commitment_weight = commitment_weight
 
     def discriminator_loss(self, real_outputs, fake_outputs):
@@ -37,8 +35,15 @@ class SoundStreamLoss(nn.Module):
         self, real_audio, fake_audio, real_outputs, fake_outputs, commitment_loss
     ):
         spectral = self.spectral(real_audio, fake_audio)
-        adversarial = self.adversarial_loss(fake_outputs)
-        feature_matching = self.feature_matching_loss(real_outputs, fake_outputs)
+
+        adv_losses = [F.relu(1.0 - feats[-1]).mean() for feats in fake_outputs]
+        adversarial = torch.stack(adv_losses).mean()
+
+        fm_losses = []
+        for real_feats, fake_feats in zip(real_outputs, fake_outputs):
+            for r, f in zip(real_feats[:-1], fake_feats[:-1]):
+                fm_losses.append(F.l1_loss(f, r.detach()))
+        feature_matching = torch.stack(fm_losses).mean()
 
         total = (
             self.spectral_weight * spectral
@@ -54,22 +59,3 @@ class SoundStreamLoss(nn.Module):
             "feature_matching_loss": feature_matching,
             "commitment_loss": commitment_loss,
         }
-
-    @staticmethod
-    def adversarial_loss(fake_outputs):
-        losses = []
-
-        for fake_feats in fake_outputs:
-            losses.append(F.relu(1.0 - fake_feats[-1]).mean())
-
-        return torch.stack(losses).mean()
-
-    @staticmethod
-    def feature_matching_loss(real_outputs, fake_outputs):
-        losses = []
-
-        for real_feats, fake_feats in zip(real_outputs, fake_outputs):
-            for real_f, fake_f in zip(real_feats[:-1], fake_feats[:-1]):
-                losses.append(F.l1_loss(fake_f, real_f.detach()))
-
-        return torch.stack(losses).mean()
