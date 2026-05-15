@@ -16,12 +16,14 @@ def get_dataloaders(config):
 
     dataloaders = {}
     for partition in config.datasets.keys():
+        is_train = partition == "train"
         dataloaders[partition] = instantiate(
             config.dataloader,
             dataset=datasets[partition],
             collate_fn=collate_fn,
-            drop_last=(partition == "train"),
-            shuffle=(partition == "train"),
+            batch_size=config.dataloader.batch_size if is_train else 1,
+            drop_last=is_train,
+            shuffle=is_train,
             worker_init_fn=set_worker_seed,
         )
 

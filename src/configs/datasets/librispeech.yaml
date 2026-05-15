@@ -4,9 +4,11 @@ train:
   train_mode: true
   sample_rate: 16000
   crop_seconds: 0.5
+  limit: 10000
 
 test:
   _target_: src.datasets.LibrispeechDataset
   data_dir: data/LibriSpeech/test-clean
   train_mode: false
   sample_rate: 16000
+  limit: 200
