@@ -1,0 +1,3 @@
+inference:
+  - _target_: src.metrics.STOIMetric
+    sample_rate: 16000

@@ -1,0 +1,41 @@
+defaults:
+  - model: soundstream
+  - writer: soundstream
+  - metrics: audio
+  - datasets: librispeech
+  - dataloader: soundstream
+  - _self_
+
+trainer:
+  seed: 1
+  device: auto
+  n_epochs: 45
+  epoch_len: 1000
+  total_steps: 45000
+  log_step: 25
+  eval_step: 1000
+  audio_log_step: 500
+  save_period: 5000
+  max_grad_norm: 10.0
+  save_dir: saved
+  resume_from: null
+  sample_rate: 16000
+  device_tensors: ["audio"]
+  monitor_metric: STOI
+
+optimizer_g:
+  _target_: torch.optim.Adam
+  lr: 2e-4
+  betas: [0.5, 0.9]
+
+optimizer_d:
+  _target_: torch.optim.Adam
+  lr: 2e-4
+  betas: [0.5, 0.9]
+
+loss:
+  _target_: src.loss.SoundStreamLoss
+  sample_rate: ${trainer.sample_rate}
+
+discriminator:
+  _target_: src.model.SoundStreamDiscriminator

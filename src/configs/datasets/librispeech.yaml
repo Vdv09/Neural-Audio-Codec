@@ -1,0 +1,12 @@
+train:
+  _target_: src.datasets.LibrispeechDataset
+  data_dir: data/LibriSpeech/train-clean-100
+  train_mode: true
+  sample_rate: 16000
+  crop_seconds: 0.5
+
+test:
+  _target_: src.datasets.LibrispeechDataset
+  data_dir: data/LibriSpeech/test-clean
+  train_mode: false
+  sample_rate: 16000
