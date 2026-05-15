@@ -149,7 +149,7 @@ class SoundStreamTrainer:
                 "reconstructed", last_out["audio_hat"][0], self.cfg.sample_rate
             )
 
-            log_line = ", ".join(f"{k}: {v:.4f}" for k, v in logs.items())  # noqa: E231
+            log_line = ", ".join(f"{k}: {v}" for k, v in logs.items())
             self.logger.info(f"epoch {epoch} step {self.step} {part}: {log_line}")
 
             if part == "test":
