@@ -44,7 +44,7 @@ def run(model, data_dir, device):
 
         stoi_scores.append(stoi(real_np, fake_np, SAMPLE_RATE, extended=False))
 
-        nisqa_scores.append(nisqa(fake.squeeze(1)).item())
+        nisqa_scores.append(float(nisqa(fake.squeeze(1)).flatten()[0]))
 
     print(f"STOI: {np.mean(stoi_scores)} (n={len(stoi_scores)})")
     print(f"NISQA: {np.mean(nisqa_scores)} (n={len(nisqa_scores)})")
