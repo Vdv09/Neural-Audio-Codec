@@ -9,6 +9,8 @@ hydra-core
 omegaconf
 comet_ml
 pystoi
+gdown
+torchcodec
 
 black
 isort
